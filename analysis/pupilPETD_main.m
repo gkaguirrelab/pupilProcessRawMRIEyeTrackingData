@@ -1,4 +1,4 @@
-function [PupilData] = LiveTrack_CalibrateReport(savePath, saveName, Report,ScaleCal,LTdata)
+function [PupilData] = pupilPETD_main(savePath, saveName, Report,ScaleCal,LTdata)
 
 % calibrate report
 %
@@ -15,19 +15,18 @@ function [PupilData] = LiveTrack_CalibrateReport(savePath, saveName, Report,Scal
 % PupilData.Height - pupil height in mm,  is 0 if blink occurrs or pupil
 % is otherwise not tracked.
 %
-% PupilData.AbsoluteAngle - the absolute displacement of the gaze (in
-% degrees of visual angle) between a given sample and a conventional
-% "Origin point" on the screen (center of the screen)
+% PupilData.Theta - polar angle in rad of the gaze direction with respect to the
+% center of the screen.
 %
-% PupilData.RelativeAngle - the relative displacement of the gaze (in
-% degrees of visual angle) between a given sample and the previous one
+% PupilData.Rho - polar radius in mm of the gaze direction with respect to the
+% center of the screen.
 %
 %% load report and calibration data
 load (Report)
 load (ScaleCal)
 if exist ('LTdata', 'var')
-   load (LTdata)
-   GazeCal = true;
+    load (LTdata)
+    GazeCal = true;
 else
     GazeCal = false;
 end
@@ -39,8 +38,10 @@ PupilData(2 * length([Report.frameCount])).TTL = 0;
 PupilData(2 * length([Report.frameCount])).Width = 0;
 PupilData(2 * length([Report.frameCount])).Height = 0;
 if GazeCal
-    PupilData(2 * length([Report.frameCount])).AbsoluteAngle = 0;
-    PupilData(2 * length([Report.frameCount])).RelativeAngle = 0;
+    PupilData(2 * length([Report.frameCount])).Theta = 0;
+    PupilData(2 * length([Report.frameCount])).Rho = 0;
+    PupilData(2 * length([Report.frameCount])).Eccentricity = 0;
+    
 end
 %% set relative time
 hz2sec = 1/60;
@@ -80,30 +81,36 @@ end
 
 %%
 if GazeCal
-    % calculate calibration matrix using the non approximate formula for the
-    % degrees of visual angle. (maybe)
+    % calibrate data using calibration matrix
     
-    
-    % Apply Gaze calibration and populate Absolute Visual angle
+    % Apply Gaze calibration to get gaze location in mm
     for ii = 1:length([Report.frameCount]);
-    viewDist = 1065; % in mm
-    jj = ii*2;
-    % first field
-    pupil(jj) = [Report(ii).PupilCameraX_Ch01 Report(ii).PupilCameraY_Ch01];
-    glint(jj) = [Report(ii).Glint1CameraX_Ch01 Report(ii).Glint1CameraY_Ch01];
-    data(jj) = crsLiveTrackCalibrateRawData(CalMat, Rpc, pupil(jj), glint(jj));
-    PupilData(jj).AbsoluteAngle = rad2deg(calc_visual_angle(sqrt((data(jj,1)).^2 + (data(jj,2).^2)),viewDist));
-    % second field
-    pupil(jj+1) = [Report(ii).PupilCameraX_Ch02 Report(ii).PupilCameraY_Ch02];
-    glint(jj+1) = [Report(ii).Glint1CameraX_Ch02 Report(ii).Glint1CameraY_Ch02];
-    data(jj+1) = crsLiveTrackCalibrateRawData(CalMat, Rpc, pupil(jj+1), glint(jj+1));
-    PupilData(jj+1).AbsoluteAngle = rad2deg(calc_visual_angle(sqrt((data(jj+1,1)).^2 + (data(jj+1,2).^2)),viewDist));
-
-end
+        jj = ii*2;
+        % first field
+        pupil(jj, 1) = Report(ii).PupilCameraX_Ch01;
+        pupil(jj, 2) = Report(ii).PupilCameraY_Ch01;
+        glint(jj, 1) = Report(ii).Glint1CameraX_Ch01;
+        glint(jj, 2) = Report(ii).Glint1CameraY_Ch01;
+        
+        % second field
+        pupil(jj+1, 1) = Report(ii).PupilCameraX_Ch02;
+        pupil(jj+1, 2) = Report(ii).PupilCameraY_Ch02;
+        glint(jj+1, 1) = Report(ii).Glint1CameraX_Ch02;
+        glint(jj+1, 2) = Report(ii).Glint1CameraY_Ch02;
+    end
+    data = crsLiveTrackCalibrateRawData(CalMat, Rpc, pupil, glint);
     
-    % populate relative Visual angle
-    
-    
+    for jj = 1 : 2 * length([Report.frameCount])
+        % calculate polar coordinates of the gaze on the screen
+        [PupilData(jj).Theta, PupilData(jj).Rho] = cart2pol(data(jj,1),data(jj,2));
+        % calculate eccentricity
+        viewDist = 1065; % distance from the screen in mm
+        PupilData(jj).Eccentricity = rad2deg(calc_visual_angle(PupilData(jj).Rho,viewDist));
+        %  convert theta to conventional Polar angle (zero on 12oclock,
+        %  clockwise)
+        
+        
+    end
 end
 
 %% save out calibrated Pupil Data
