@@ -1,4 +1,4 @@
-function [PupilData] = pupilPETD_main(savePath, saveName, Report,ScaleCal,LTdata)
+function [PupilData] = pupilPETD_main(Report,ScaleCal,CalMat,Rpc)
 
 % calibrate report
 %
@@ -8,6 +8,9 @@ function [PupilData] = pupilPETD_main(savePath, saveName, Report,ScaleCal,LTdata
 % frame.
 %
 % PupilData.TTL - is 1 if a TTL was received in that frame.
+% 
+% PupilData.TrackedFlag - is 1 if both glint and pupil are correctly
+% tracked.
 %
 % PupilData.Width - pupil width in mm , is 0 if blink occurrs or pupil is
 % otherwise not tracked.
@@ -15,17 +18,22 @@ function [PupilData] = pupilPETD_main(savePath, saveName, Report,ScaleCal,LTdata
 % PupilData.Height - pupil height in mm,  is 0 if blink occurrs or pupil
 % is otherwise not tracked.
 %
-% PupilData.Theta - polar angle in rad of the gaze direction with respect to the
-% center of the screen.
+% PupilData.GazeX - X coordinate of the Gaze direction in the calibrated
+% screen reference system (positive X pointing right, positive Y pointing
+% downs, units in mm).
 %
-% PupilData.Rho - polar radius in mm of the gaze direction with respect to the
-% center of the screen.
+% PupilData.GazeY - Y coordinate of the Gaze direction in the calibrated
+% screen reference system (positive X pointing right, positive Y pointing
+% downs, units in mm).
 %
+% PupilData.Ecc - Polar radius in degrees of visual angle of the  gaze
+% direction from the center of the screen.
+%
+% PupilData.Pol - polar position of the gaze, given as clockwise from 0
+% degrees (with the upper vertical meridian being the 0 degree position,
+% and the right, horizontal meridian being 90 degrees).
 %% load report and calibration data
-load (Report)
-load (ScaleCal)
-if exist ('LTdata', 'var')
-    load (LTdata)
+if exist ('CalMat', 'var')
     GazeCal = true;
 else
     GazeCal = false;
@@ -38,9 +46,10 @@ PupilData(2 * length([Report.frameCount])).TTL = 0;
 PupilData(2 * length([Report.frameCount])).Width = 0;
 PupilData(2 * length([Report.frameCount])).Height = 0;
 if GazeCal
-    PupilData(2 * length([Report.frameCount])).Theta = 0;
-    PupilData(2 * length([Report.frameCount])).Rho = 0;
-    PupilData(2 * length([Report.frameCount])).Eccentricity = 0;
+    PupilData(2 * length([Report.frameCount])).GazeX = 0;
+    PupilData(2 * length([Report.frameCount])).GazeY = 0;
+    PupilData(2 * length([Report.frameCount])).Ecc = 0;
+    PupilData(2 * length([Report.frameCount])).Pol = 0;
     
 end
 %% set relative time
@@ -60,8 +69,9 @@ else
     for jj = 1: firstTTL-1
         PupilData(jj).RelativeTime = 0 - hz2sec* (firstTTL - jj);
     end
-    %% copy over TTL info
-    % note that every TTL signal will always appear in 2 consecutive rows
+    % copy over TTL info
+    % note that every TTL signal will only appear in the first frame that
+    % received it. 
     for ii = 1: 2 * length([Report.frameCount])
         PupilData(ii).TTL = 0;
     end
@@ -98,20 +108,14 @@ if GazeCal
         glint(jj+1, 1) = Report(ii).Glint1CameraX_Ch02;
         glint(jj+1, 2) = Report(ii).Glint1CameraY_Ch02;
     end
+    % calibrate and get: GazeX, GazeY, ecc, pol.
     data = crsLiveTrackCalibrateRawData(CalMat, Rpc, pupil, glint);
     
     for jj = 1 : 2 * length([Report.frameCount])
-        % calculate polar coordinates of the gaze on the screen
-        [PupilData(jj).Theta, PupilData(jj).Rho] = cart2pol(data(jj,1),data(jj,2));
-        % calculate eccentricity
-        viewDist = 1065; % distance from the screen in mm
-        PupilData(jj).Eccentricity = rad2deg(calc_visual_angle(PupilData(jj).Rho,viewDist));
-        %  convert theta to conventional Polar angle (zero on 12oclock,
-        %  clockwise)
-        
-        
+        PupilData(jj).GazeX = data(jj,1);
+        PupilData(jj).GazeY = data(jj,2);
+        viewDist = 1065;
+        [PupilData(jj).Ecc, PupilData(jj).Pol] = LiveTrack_cartToVisual(PupilData(jj).GazeX,PupilData(jj).GazeY,viewDist); 
     end
 end
 
-%% save out calibrated Pupil Data
-save(fullfile(savePath,saveName),'PupilData')
