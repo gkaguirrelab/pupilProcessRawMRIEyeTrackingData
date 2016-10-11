@@ -56,6 +56,7 @@ end
 %% Make animated polar plot
 writerObj = VideoWriter(fullfile(savepath,'Polar15fps4subj.avi'),'Motion JPEG AVI');
 writerObj.FrameRate =15;
+fig = figure();
 open(writerObj);
 set(gca,'nextplot','replacechildren');
 set(gcf,'Renderer','zbuffer');
@@ -81,7 +82,7 @@ for k = 1:4:20160/10
     title('Unfiltered Gaze direction in terms of Eccentricity and Polar Angle')
     l = legend ([S1, S2, S3, S4], 'TOME_3001','TOME_3002','TOME_3003','TOME_3005');
     set (l, 'Interpreter', 'none')
-    frame = getframe;
+    frame = getframe(fig);
     writeVideo(writerObj,frame);
     hold off
 end
@@ -125,4 +126,56 @@ for k = 1:4:20160/10
 end
 
 close(writerObj);
+close all
+
+
+%% with video
+% load video
+pixar = VideoReader('/Users/giulia/Dropbox-Aguirre-Brainard-Lab/TOME_materials/StimulusFiles/PixarShorts.mov');
+pixarFPS = 24;
+pixarMov3 = read(pixar,[892*pixarFPS 1228*pixarFPS]);
+frames=pixar.Numberofframes;
+
+tic
+writerObj = VideoWriter(fullfile(savepath,'TOME_3002-3mov3HALFspeedGCF.avi'),'Motion JPEG AVI');
+writerObj.FrameRate =6;
+open(writerObj);
+axis([-697.347/2 697.347/2 -392.257/2 392.257/2]) %screen dimensions in mm
+set(gca,'YDir', 'reverse')
+set(gca,'nextplot','replacechildren');
+set(gcf,'Renderer','zbuffer');
+time = 0:1/60:336/20;
+f=892*pixarFPS;
+for k = 1:5:20160/20
+    thisframe=read(pixar,f);
+    figure(1);imagesc([-697.347/2 697.347/2], [-392.257/2 392.257/2], thisframe);
+    hold on
+%     axis([-697.347/2 697.347/2 -392.257/2 392.257/2]) %screen dimensions in mm
+%     set(gca,'YDir', 'reverse')
+%     S1 = plot(X(k,1),Y(k,1),'.','MarkerSize', 15);
+%     hold on
+    axis([-697.347/2 697.347/2 -392.257/2 392.257/2]) %screen dimensions in mm
+    set(gca,'YDir', 'reverse')
+    S2 = plot(X(k,2),Y(k,2),'.','MarkerSize', 15);
+    hold on
+    axis([-697.347/2 697.347/2 -392.257/2 392.257/2]) %screen dimensions in mm
+    set(gca,'YDir', 'reverse')
+    S3 = plot(X(k,3),Y(k,3),'.','MarkerSize', 15);
+    hold on
+%     axis([-697.347/2 697.347/2 -392.257/2 392.257/2]) %screen dimensions in mm
+%     set(gca,'YDir', 'reverse')
+%     S4 = plot(X(k,4),Y(k,4),'.','MarkerSize', 15);
+    str = ['Time = ', num2str(time(k))];
+    text(-300,-150,str)
+    title('Gaze direction in mm from center of the monitor')
+    l = legend ([S2, S3],'TOME_3002','TOME_3003');
+    set (l, 'Interpreter', 'none')
+    frame = getframe(gcf);
+    writeVideo(writerObj,frame);
+    hold off
+    f= f + 2;
+end
+
+close(writerObj);
+toc
 close all
