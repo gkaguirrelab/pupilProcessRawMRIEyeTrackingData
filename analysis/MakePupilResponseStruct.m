@@ -1,19 +1,14 @@
-function MakePupilResponseStruct(PupilData)
+function [response] = MakePupilResponseStruct(PupilData, metaData)
 
-% pupil packet structure for each run:
-% pupil.Response.timebase (array)
-% pupil.Response.value (array)
-% pupil.Response.metadata (struct)
-
-% with "Response" being 
-% % TTL
-% % width
-% % height
-% % isTracked (is it a valid sample)
-% % gazeX
-% % gazeY
-% % ecc
-% % pol
+% Response struct:
+% response.timebase
+% response.pupilWidth
+% response.pupilHeight
+% response.gazeEcc
+% response.gazePolar
+% response.TTL
+% response.isTracked
+% response.metaData
 
 % In metadata: ( these are either structs or values or paths?)
 % % subject name
@@ -26,3 +21,27 @@ function MakePupilResponseStruct(PupilData)
 % % Raw report
 % % Screen specs
 % % Stimuli specs
+
+%% initialize array elements
+response(length([PupilData.RelativeTime])).timebase = NaN;
+response(length([PupilData.RelativeTime])).pupilWidth = NaN;
+response(length([PupilData.RelativeTime])).pupilHeight = NaN;
+response(length([PupilData.RelativeTime])).gazeEcc = NaN;
+response(length([PupilData.RelativeTime])).gazePolar = NaN;
+response(length([PupilData.RelativeTime])).TTL = NaN;
+response(length([PupilData.RelativeTime])).isTracked = NaN;
+
+%% Populate response fields
+sec2msec = 1000;
+for ii = 1:length([PupilData.RelativeTime])
+    response(ii).timebase = PupilData(ii).RelativeTime * sec2msec;
+    response(ii).pupilWidth = PupilData(ii).Width;
+    response(ii).pupilHeight = PupilData(ii).Height;
+    response(ii).gazeEcc = PupilData(ii).Ecc;
+    response(ii).gazePolar = PupilData(ii).Pol;
+    response(ii).TTL = PupilData(ii).TTL;
+    response(ii).isTracked = PupilData(ii).isTracked;
+end
+
+%% copy over metaData
+response.metaData = metaData;
