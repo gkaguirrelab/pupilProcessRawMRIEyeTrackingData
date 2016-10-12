@@ -1,4 +1,4 @@
-function [PupilData] = CalibrateLivetrackData(Report,ScaleCal,CalMat,Rpc, viewDist)
+function [PupilData] = CalibrateLivetrackData(Report,ScaleCal,CalMat,Rpc,viewDist)
 
 % calibrate LiveTrack Data (collected in the Report) using the Scale and
 % gaze calibration values.
@@ -38,7 +38,7 @@ function [PupilData] = CalibrateLivetrackData(Report,ScaleCal,CalMat,Rpc, viewDi
 %
 % NOTE: this function does not filter the data, just converts it.
 %% load report and calibration data
-if exist ('CalMat', 'var')
+if exist ('CalMat', 'var') && exist ('Rpc', 'var') && exist ('viewDist', 'var')
     GazeCal = true;
 else
     GazeCal = false;
