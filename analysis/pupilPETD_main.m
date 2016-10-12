@@ -22,11 +22,12 @@ userName = strtrim(tmpName);
 dropboxDir = ['/Users/' userName '/Dropbox-Aguirre-Brainard-Lab/'];
 % define eyetracking data path
 if isfield(metaData.dropboxPaths, 'projectSubfolder')
-    dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectSubfolder, ...
-        metaData.names.subjectName,metaData.names.sessionDate,'Eyetracking'));
+    dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectFolder, ...
+        metaData.dropboxPaths.projectSubfolder, ...
+        metaData.names.subjectName,metaData.names.sessionDate,'EyeTracking'));
 else
     dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectFolder, ...
-        metaData.names.subjectName,metaData.names.sessionDate,'Eyetracking'));
+        metaData.names.subjectName,metaData.names.sessionDate,'EyeTracking'));
 end
 % load
 load (fullfile(dataPath,[metaData.names.runName '_report.mat']));
@@ -37,7 +38,10 @@ end
 
 %% Calibrate LiveTrack data
 if isfield (metaData.names, 'GazeCalName')
-    viewDist = metaData.refValues.screenSpecs.viewDist;
+    viewDist = metaData.refValues.screenSpecs.SC3TScreenSizeMeasurements.distanceToScreen;
+    if strcmp (metaData.refValues.screenSpecs.SC3TScreenSizeMeasurements.distanceToScreen, 'cm')
+        viewDist = viewDist * 10;
+    end
     [PupilData] = CalibrateLivetrackData(Report,ScaleCal,CalMat,Rpc,viewDist);
 else
     [PupilData] = CalibrateLivetrackData(Report,ScaleCal);

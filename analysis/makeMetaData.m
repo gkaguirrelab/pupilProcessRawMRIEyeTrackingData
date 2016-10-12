@@ -58,12 +58,13 @@ end
 [~, tmpName] = system('whoami');
 userName = strtrim(tmpName);
 dropboxDir = ['/Users/' userName '/Dropbox-Aguirre-Brainard-Lab/'];
-if isfield(metaData.dropboxPaths, 'projectSubfolder')
-    dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectSubfolder, ...
-        metaData.names.subjectName,metaData.names.sessionDate,'Eyetracking'));
+if ischar(projectSubfolder)
+    dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectFolder, ...
+        metaData.dropboxPaths.projectSubfolder, ...
+        metaData.names.subjectName,metaData.names.sessionDate,'EyeTracking'));
 else
     dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectFolder, ...
-        metaData.names.subjectName,metaData.names.sessionDate,'Eyetracking'));
+        metaData.names.subjectName,metaData.names.sessionDate,'EyeTracking'));
 end
 metaData.refValues.screenSpecs = load(screenSpecsFile);
 metaData.refValues.livetrackReport = load (fullfile(dataPath,[metaData.names.runName '_report.mat']));
