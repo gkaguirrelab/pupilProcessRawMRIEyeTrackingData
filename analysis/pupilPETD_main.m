@@ -1,121 +1,29 @@
-function [PupilData] = pupilPETD_main(Report,ScaleCal,CalMat,Rpc)
+function [response] = pupilPETD_main(someInput)
 
-% calibrate report
-%
-% PupilData.relativeTime - t=0 the time when the first T is received. Every
-% other row of the report has a relative time stamp (rows contain data
-% acquired at 60Hz). If no TTL is received, t = 0 is the first acquired
-% frame.
-%
-% PupilData.TTL - is 1 if a TTL was received in that frame.
-% 
-% PupilData.TrackedFlag - is 1 if both glint and pupil are correctly
-% tracked.
-%
-% PupilData.Width - pupil width in mm , is 0 if blink occurrs or pupil is
-% otherwise not tracked.
-%
-% PupilData.Height - pupil height in mm,  is 0 if blink occurrs or pupil
-% is otherwise not tracked.
-%
-% PupilData.GazeX - X coordinate of the Gaze direction in the calibrated
-% screen reference system (positive X pointing right, positive Y pointing
-% downs, units in mm).
-%
-% PupilData.GazeY - Y coordinate of the Gaze direction in the calibrated
-% screen reference system (positive X pointing right, positive Y pointing
-% downs, units in mm).
-%
-% PupilData.Ecc - Polar radius in degrees of visual angle of the  gaze
-% direction from the center of the screen.
-%
-% PupilData.Pol - polar position of the gaze, given as clockwise from 0
-% degrees (with the upper vertical meridian being the 0 degree position,
-% and the right, horizontal meridian being 90 degrees).
-%% load report and calibration data
-if exist ('CalMat', 'var')
-    GazeCal = true;
-else
-    GazeCal = false;
-end
+% Inputs:
+% paths
+%     to dropbox project folder
+%     to dropbox project subfolder (optional)
+%     to output directory
+%     to Stimuli directory
+%     to Screen specs file
+%     to units file
+% names
+%     subjectName
+%     sessionDate
+%     runName
+%     ScaleCalName
+%     GazeCalName
 
-%% intialize PupilData fields
-% Double report field so that every raw is 1 sample (rows acquired at 60Hz)
-PupilData(2 * length([Report.frameCount])).RelativeTime = 0;
-PupilData(2 * length([Report.frameCount])).TTL = 0;
-PupilData(2 * length([Report.frameCount])).Width = 0;
-PupilData(2 * length([Report.frameCount])).Height = 0;
-if GazeCal
-    PupilData(2 * length([Report.frameCount])).GazeX = 0;
-    PupilData(2 * length([Report.frameCount])).GazeY = 0;
-    PupilData(2 * length([Report.frameCount])).Ecc = 0;
-    PupilData(2 * length([Report.frameCount])).Pol = 0;
-    
-end
-%% set relative time
-hz2sec = 1/60;
-TTLs = find ([Report.Digital_IO1]);
-if isempty (TTLs)
-    PupilData(1).RelativeTime = 0;
-    for ii = 2: 2 * length([Report.frameCount])
-        PupilData(ii).RelativeTime = hz2sec*ii;
-    end
-else
-    firstTTL = TTLs(1)*2;
-    PupilData(firstTTL).RelativeTime = 0;
-    for ii = (firstTTL +1 ) : 2 * length([Report.frameCount])
-        PupilData(ii).RelativeTime = PupilData(ii-1).RelativeTime + hz2sec;
-    end
-    for jj = 1: firstTTL-1
-        PupilData(jj).RelativeTime = 0 - hz2sec* (firstTTL - jj);
-    end
-    % copy over TTL info
-    % note that every TTL signal will only appear in the first frame that
-    % received it. 
-    for ii = 1: 2 * length([Report.frameCount])
-        PupilData(ii).TTL = 0;
-    end
-    for ii = 1:length(TTLs)
-        PupilData(TTLs(ii)*2).TTL = 1;
-        %     PupilData(TTLs(ii)*2 +1).TTL = 1;
-    end
-end
-%% Apply scale calibration to pupil Height and Width and populate PupilData
-for ii = 1:length([Report.frameCount]);
-    jj = ii*2;
-    PupilData(jj).Width = Report(ii).PupilWidth_Ch01 ./ ScaleCal.cameraUnitsToMmWidthMean;
-    PupilData(jj).Height = Report(ii).PupilHeight_Ch01 ./ ScaleCal.cameraUnitsToMmHeightMean;
-    PupilData(jj+1).Width = Report(ii).PupilWidth_Ch02 ./ ScaleCal.cameraUnitsToMmWidthMean;
-    PupilData(jj+1).Height = Report(ii).PupilHeight_Ch02 ./ ScaleCal.cameraUnitsToMmHeightMean;
-end
+%% load in all data
 
-%%
-if GazeCal
-    % calibrate data using calibration matrix
-    
-    % Apply Gaze calibration to get gaze location in mm
-    for ii = 1:length([Report.frameCount]);
-        jj = ii*2;
-        % first field
-        pupil(jj, 1) = Report(ii).PupilCameraX_Ch01;
-        pupil(jj, 2) = Report(ii).PupilCameraY_Ch01;
-        glint(jj, 1) = Report(ii).Glint1CameraX_Ch01;
-        glint(jj, 2) = Report(ii).Glint1CameraY_Ch01;
-        
-        % second field
-        pupil(jj+1, 1) = Report(ii).PupilCameraX_Ch02;
-        pupil(jj+1, 2) = Report(ii).PupilCameraY_Ch02;
-        glint(jj+1, 1) = Report(ii).Glint1CameraX_Ch02;
-        glint(jj+1, 2) = Report(ii).Glint1CameraY_Ch02;
-    end
-    % calibrate and get: GazeX, GazeY, ecc, pol.
-    data = crsLiveTrackCalibrateRawData(CalMat, Rpc, pupil, glint);
-    
-    for jj = 1 : 2 * length([Report.frameCount])
-        PupilData(jj).GazeX = data(jj,1);
-        PupilData(jj).GazeY = data(jj,2);
-        viewDist = 1065;
-        [PupilData(jj).Ecc, PupilData(jj).Pol] = LiveTrack_cartToVisual(PupilData(jj).GazeX,PupilData(jj).GazeY,viewDist); 
-    end
-end
 
+%% make metaData
+
+[metaData] = makeMetaData(someInput);
+%% Calibrate LiveTrack data
+
+[PupilData] = CalibrateLivetrackData(Report,ScaleCal,CalMat,Rpc,viewDist);
+%% Make response structure
+
+[response] = MakePupilResponseStruct(PupilData, metaData);
