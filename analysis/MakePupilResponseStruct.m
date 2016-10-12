@@ -22,6 +22,9 @@ function [response] = MakePupilResponseStruct(PupilData, metaData)
 % % Screen specs
 % % Stimuli specs
 
+
+%% copy over metaData
+response.metaData = metaData;
 %% initialize array elements
 response(length([PupilData.RelativeTime])).timebase = NaN;
 response(length([PupilData.RelativeTime])).pupilWidth = NaN;
@@ -43,5 +46,4 @@ for ii = 1:length([PupilData.RelativeTime])
     response(ii).isTracked = PupilData(ii).isTracked;
 end
 
-%% copy over metaData
-response.metaData = metaData;
+
