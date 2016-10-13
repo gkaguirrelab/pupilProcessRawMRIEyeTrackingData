@@ -1,4 +1,6 @@
-function [ecc, pol] = LiveTrack_cartToVisual(x,y,f)
+function [ecc, pol] = ConvertLiveTrackCartToPolar(x,y,f)
+% function [ecc, pol] = ConvertLiveTrackCartToPolar(x,y,f)
+%
 % this function converts the cartesian coordinates of the Gaze direction
 % from the LiveTrack Report reference system to the standard eccentricity
 % and polar position values.

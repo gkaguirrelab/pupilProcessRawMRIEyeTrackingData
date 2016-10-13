@@ -37,6 +37,18 @@ function [metaData] = makeMetaData(projectFolder,projectSubfolder,outputDir,stim
 %    metaData.misc.gitVersion
 %
 
+% define eyetracking data path
+if isfield(metaData.dropboxPaths, 'projectSubfolder')
+    dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectFolder, ...
+        metaData.dropboxPaths.projectSubfolder, ...
+        metaData.names.subjectName,metaData.names.sessionDate,'EyeTracking'));
+else
+    dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectFolder, ...
+        metaData.names.subjectName,metaData.names.sessionDate,'EyeTracking'));
+end
+
+
+
 %% Populate fields with inputs
 metaData.dropboxPaths.projectFolder = projectFolder;
 if ischar(projectSubfolder)
