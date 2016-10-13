@@ -1,50 +1,42 @@
 function [response] = ConvertReportToResponseStruct(metaData, dropboxDir)
+% [response] = ConvertReportToResponseStruct(metaData, dropboxDir)
 
-% Inputs:
-% paths
-%     to dropbox project folder
-%     to dropbox project subfolder (optional)
-%     to output directory
-%     to Stimuli directory
-%     to Screen specs file
-%     to units file
-% names
-%     subjectName
-%     sessionDate
-%     runName
-%     ScaleCalName
-%     GazeCalName
+% This function will generate a Response Struct for a single LiveTrack
+% dataset (i.e. a single run). 
 
-%% SETUP
+% Inputs
+% metadata - created using the function MakeMetaData
+% dropboxDir - path to the dropbox directory on local machine
 
+%% SETUP 
 % define eyetracking data path
 if isfield(metaData.dropboxPaths, 'projectSubfolder')
     dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectFolder, ...
         metaData.dropboxPaths.projectSubfolder, ...
-        metaData.names.subjectName,metaData.names.sessionDate,'EyeTracking'));
+        metaData.names.subjectName,metaData.names.sessionDate,metaData.dropboxPaths.eyeTrackingFolder));
 else
     dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectFolder, ...
-        metaData.names.subjectName,metaData.names.sessionDate,'EyeTracking'));
+        metaData.names.subjectName,metaData.names.sessionDate,metaData.dropboxPaths.eyeTrackingFolder));
 end
-
-
-%%  LOAD REPORT
+%%  LOAD DATA
+% load the Report variable
 load (fullfile(dataPath,[metaData.names.runName '_report.mat']));
+% load the ScaleCal  variable
 load (fullfile(dataPath,[metaData.names.ScaleCalName '.mat']));
+% load CalMat, Rpc, viewDist (if a scale calibration exists)
 if isfield (metaData.names, 'GazeCalName')
     load (fullfile(dataPath,[metaData.names.GazeCalName '.mat']));
+    load (metaData.dropboxPaths.screenSpecsFile);
 end
-
 %% CALIBRATE LIVE TRACK DATA
 if isfield (metaData.names, 'GazeCalName')
-    viewDist = metaData.refValues.screenSpecs.SC3TScreenSizeMeasurements.distanceToScreen;
-    if strcmp (metaData.refValues.screenSpecs.SC3TScreenSizeMeasurements.distanceToScreen, 'cm')
+    viewDist = SC3TScreenSizeMeasurements.distanceToScreen;
+    if strcmp (SC3TScreenSizeMeasurements.distanceToScreen, 'cm')
         viewDist = viewDist * 10;
     end
     [PupilData] = CalibrateLiveTrackData(Report,ScaleCal,CalMat,Rpc,viewDist);
 else
     [PupilData] = CalibrateLiveTrackData(Report,ScaleCal);
 end
-
 %% MAKE RESPONSE STRUCTURE
 [response] = MakePupilResponseStruct(PupilData, metaData);

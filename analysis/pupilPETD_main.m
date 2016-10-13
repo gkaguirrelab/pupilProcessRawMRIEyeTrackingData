@@ -16,7 +16,6 @@ userName = strtrim(tmpName);
 dropboxDir = fullfile('/Users', userName, '/Dropbox-Aguirre-Brainard-Lab');
 
 
-
 %% Identify available reports to process on the DropBox directory
 % Organize the list of available reports
 
@@ -35,6 +34,7 @@ dropboxDir = fullfile('/Users', userName, '/Dropbox-Aguirre-Brainard-Lab');
 % For now, here is some hard-coded production of a metaDataCellArray
 projectFolder = 'TOME_data'; 
 projectSubfolder = 'session2_spatialStimuli';
+eyeTrackingFolder = 'EyeTracking';
 outputDir = 0 ;
 stimuliDir = 'TOME_materials/StimulusFiles';
 screenSpecsFile = '/Users/giulia/Dropbox-Aguirre-Brainard-Lab/TOME_materials/hardwareSpecifications/SC3TScreenSizeMeasurements.mat';
@@ -46,9 +46,9 @@ ScaleCalName = 'TOME_3001_081916ScaleCal';
 GazeCalName = 'LTcal_081916_133549';
 
 %% make metadata
-[metaDataCellArray{1,1,1,1}] = makeMetaData(projectFolder,projectSubfolder,outputDir,stimuliDir,screenSpecsFile,unitsFile,subjectName,sessionDate,runName,ScaleCalName,GazeCalName);
-
-
+[metaDataCellArray{1,1,1,1}] = MakeMetaData(outputDir,projectFolder,...
+    projectSubfolder,eyeTrackingFolder,stimuliDir,screenSpecsFile,unitsFile,...
+    subjectName,sessionDate,runName,ScaleCalName,GazeCalName);
 
 %% Convert the metaDataCellArray into a cell array of response structs
 
@@ -63,7 +63,7 @@ for ss=1:nSessions
             for rr=1:nRuns
                 if ~isempty(metaDataCellArray{ss,bb,dd,rr})
                     responseStructCellArray{ss,bb,dd,rr} = ...
-                        ConvertReportToResponseStruct(metaData{ss,bb,dd,rr}, dropboxDir);
+                        ConvertReportToResponseStruct(metaDataCellArray{ss,bb,dd,rr}, dropboxDir);
                 end % check that this instance exists
             end % loop over runs
         end % loop over dates

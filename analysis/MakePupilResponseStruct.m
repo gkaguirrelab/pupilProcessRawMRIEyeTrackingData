@@ -25,25 +25,40 @@ function [response] = MakePupilResponseStruct(PupilData, metaData)
 
 %% copy over metaData
 response.metaData = metaData;
-%% initialize array elements
-response(length([PupilData.RelativeTime])).timebase = NaN;
-response(length([PupilData.RelativeTime])).pupilWidth = NaN;
-response(length([PupilData.RelativeTime])).pupilHeight = NaN;
-response(length([PupilData.RelativeTime])).gazeEcc = NaN;
-response(length([PupilData.RelativeTime])).gazePolar = NaN;
-response(length([PupilData.RelativeTime])).TTL = NaN;
-response(length([PupilData.RelativeTime])).isTracked = NaN;
+%% copy other array elements
 
-%% Populate response fields
+response.pupilWidth = [PupilData.Width];
+response.pupilHeight = [PupilData.Height];
+response.gazeEcc = [PupilData.Ecc];
+response.gazePolar = [PupilData.Pol];
+response.TTL = [PupilData.TTL];
+response.isTracked = [PupilData.isTracked];
 sec2msec = 1000;
 for ii = 1:length([PupilData.RelativeTime])
-    response(ii).timebase = PupilData(ii).RelativeTime * sec2msec;
-    response(ii).pupilWidth = PupilData(ii).Width;
-    response(ii).pupilHeight = PupilData(ii).Height;
-    response(ii).gazeEcc = PupilData(ii).Ecc;
-    response(ii).gazePolar = PupilData(ii).Pol;
-    response(ii).TTL = PupilData(ii).TTL;
-    response(ii).isTracked = PupilData(ii).isTracked;
+   response.timebase(ii) = PupilData(ii).RelativeTime * sec2msec;
 end
+
+
+%% OLD
+% %% initialize array elements
+% response(length([PupilData.RelativeTime])).timebase = NaN;
+% response(length([PupilData.RelativeTime])).pupilWidth = NaN;
+% response(length([PupilData.RelativeTime])).pupilHeight = NaN;
+% response(length([PupilData.RelativeTime])).gazeEcc = NaN;
+% response(length([PupilData.RelativeTime])).gazePolar = NaN;
+% response(length([PupilData.RelativeTime])).TTL = NaN;
+% response(length([PupilData.RelativeTime])).isTracked = NaN;
+%
+% %% Populate response fields
+% sec2msec = 1000;
+% for ii = 1:length([PupilData.RelativeTime])
+%     response(ii).timebase = PupilData(ii).RelativeTime * sec2msec;
+%     response(ii).pupilWidth = PupilData(ii).Width;
+%     response(ii).pupilHeight = PupilData(ii).Height;
+%     response(ii).gazeEcc = PupilData(ii).Ecc;
+%     response(ii).gazePolar = PupilData(ii).Pol;
+%     response(ii).TTL = PupilData(ii).TTL;
+%     response(ii).isTracked = PupilData(ii).isTracked;
+% end
 
 
