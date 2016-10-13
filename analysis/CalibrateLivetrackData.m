@@ -1,5 +1,7 @@
-function [PupilData] = CalibrateLivetrackData(Report,ScaleCal,CalMat,Rpc,viewDist)
-
+function [PupilData] = CalibrateLiveTrackData(Report,ScaleCal,CalMat,Rpc,viewDist)
+% function [PupilData] = CalibrateLiveTrackData(Report,ScaleCal,CalMat,Rpc,viewDist)
+%
+%
 % calibrate LiveTrack Data (collected in the Report) using the Scale and
 % gaze calibration values.
 %
@@ -123,7 +125,7 @@ if GazeCal
     for jj = 1 : 2 * length([Report.frameCount])
         PupilData(jj).GazeX = data(jj,1);
         PupilData(jj).GazeY = data(jj,2);
-        [PupilData(jj).Ecc, PupilData(jj).Pol] = LiveTrack_cartToVisual(PupilData(jj).GazeX,PupilData(jj).GazeY,viewDist);
+        [PupilData(jj).Ecc, PupilData(jj).Pol] = ConvertLiveTrackCartToPolar(PupilData(jj).GazeX,PupilData(jj).GazeY,viewDist);
     end
 end
 

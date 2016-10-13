@@ -1,11 +1,13 @@
-function [metaData] = makeMetaData(projectFolder,projectSubfolder,outputDir,stimuliDir,screenSpecsFile,unitsFile,subjectName,sessionDate,runName,ScaleCalName,GazeCalName)
-
-
-%%
+function [metaData] = MakeMetaData(outputDir,projectFolder,projectSubfolder,eyeTrackingFolder,stimuliDir,screenSpecsFile,unitsFile,subjectName,sessionDate,runName,ScaleCalName,GazeCalName)
+%  [metaData] = makeMetaData(outputDir,projectFolder,projectSubfolder,eyeTrackingFolder,stimuliDir,screenSpecsFile,unitsFile,subjectName,sessionDate,runName,ScaleCalName,GazeCalName)
+%  This functon will create the metadata fields for stimulus Response
+%  Structs
+%
 % Paths
+%     metaData.dropboxPaths.outputDir
 %     metaData.dropboxPaths.projectFolder
 %     metaData.dropboxPaths.projectSubfolder
-%     metaData.dropboxPaths.outputDir
+%     metaData.dropboxPaths.eyeTrackingfolder
 %     metaData.dropboxPaths.stimuliDir
 %     metaData.dropboxPaths.screenSpecsFile
 %     metaData.dropboxPaths.unitsFile
@@ -17,32 +19,18 @@ function [metaData] = makeMetaData(projectFolder,projectSubfolder,outputDir,stim
 %     metaData.names.ScaleCalName
 %     metaData.names.GazeCalName
 %
-% RefValues
-%     metaData.refValues.screenSpecs
-%                               .width
-%                               .height
-%                               .diag
-%                               .viewDist
-%                               .units
-%     metaData.refValues.livetrackReport
-%     metaData.refValues.scaleCal
-%                             all scaleCal fields
-%     metaData.refValues.gazeCal
-%                               .Ldat
-%                               .Lcal
-%                               .Rpc
 % Misc
 %    metaData.misc.timeStamp
 %    metaData.misc.creator
 %    metaData.misc.gitVersion
 %
-
 %% Populate fields with inputs
+metaData.dropboxPaths.outputDir = outputDir;
 metaData.dropboxPaths.projectFolder = projectFolder;
 if ischar(projectSubfolder)
     metaData.dropboxPaths.projectSubfolder = projectSubfolder;
 end
-metaData.dropboxPaths.outputDir = outputDir;
+metaData.dropboxPaths.eyeTrackingFolder = eyeTrackingFolder;
 metaData.dropboxPaths.stimuliDir = stimuliDir;
 metaData.dropboxPaths.screenSpecsFile = screenSpecsFile;
 metaData.dropboxPaths.unitsFile = unitsFile;
@@ -54,26 +42,15 @@ if ischar(GazeCalName)
     metaData.names.GazeCalName = GazeCalName;
 end
 
-%% automatically populate the other fields
-[~, tmpName] = system('whoami');
-userName = strtrim(tmpName);
-dropboxDir = ['/Users/' userName '/Dropbox-Aguirre-Brainard-Lab/'];
-if ischar(projectSubfolder)
-    dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectFolder, ...
-        metaData.dropboxPaths.projectSubfolder, ...
-        metaData.names.subjectName,metaData.names.sessionDate,'EyeTracking'));
-else
-    dataPath =  (fullfile(dropboxDir,metaData.dropboxPaths.projectFolder, ...
-        metaData.names.subjectName,metaData.names.sessionDate,'EyeTracking'));
-end
-metaData.refValues.screenSpecs = load(screenSpecsFile);
-metaData.refValues.livetrackReport = load (fullfile(dataPath,[metaData.names.runName '_report.mat']));
-metaData.refValues.scaleCal = load (fullfile(dataPath,[metaData.names.ScaleCalName '.mat']));
-if ischar(GazeCalName)
-    metaData.refValues.gazeCal = load (fullfile(dataPath,[metaData.names.GazeCalName '.mat']));
-end
-% set timestamp
+%% Get timestamp
 formatOut = 'mmddyy_HHMMSS';
 timestamp = datestr((datetime('now')),formatOut);
 metaData.misc.timeStamp = timestamp;
+%% Get creator
+[~, tmpName] = system('whoami');
+userName = strtrim(tmpName);
 metaData.misc.creator = userName;
+
+%% Get git version
+
+% NEED TO WRITE THIS
