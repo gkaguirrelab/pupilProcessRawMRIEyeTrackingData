@@ -46,18 +46,16 @@ GazeCalName = 'LTcal_081916_133549';
 % for analysis.
 
 % project params
-dropBoxDir = 'TOME_data';
 params.outputDir = 'TOME_analysis';
+params.projectFolder = 'TOME_data';
 params.eyeTrackingDir = 'EyeTracking';
 params.stimuliDir = 'Stimuli';
-param.screenSpecsFile = 'TOME_materials/hardwareSpecifications/SC3TScreenSizeMeasurements.mat';
+params.screenSpecsFile = 'TOME_materials/hardwareSpecifications/SC3TScreenSizeMeasurements.mat';
 params.unitsFile = 'TOME_materials/hardwareSpecifications/unitsFile.mat';
 
 [reportsToProcessCellArray, reportParamsStructArray] = identifyReportsToProcess(dropboxDir,params);
 
-%% make metadata cell array
-
-% will become
+%% Make metaData cell array
 nSessions=size(reportsToProcessCellArray,1);
 nSubjects=size(reportsToProcessCellArray,2);
 nDates=size(reportsToProcessCellArray,3);
