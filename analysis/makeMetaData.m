@@ -1,4 +1,4 @@
-function [metaData] = MakeMetaData(outputDir,projectFolder,projectSubfolder,eyeTrackingFolder,stimuliDir,screenSpecsFile,unitsFile,subjectName,sessionDate,runName,ScaleCalName,GazeCalName)
+function [metaData] = makeMetaData(outputDir,projectFolder,projectSubfolder,eyeTrackingFolder,stimuliDir,screenSpecsFile,unitsFile,subjectName,sessionDate,runName,ScaleCalName,GazeCalName)
 %  [metaData] = makeMetaData(outputDir,projectFolder,projectSubfolder,eyeTrackingFolder,stimuliDir,screenSpecsFile,unitsFile,subjectName,sessionDate,runName,ScaleCalName,GazeCalName)
 %  This functon will create the metadata fields for stimulus Response
 %  Structs

@@ -1,4 +1,4 @@
-function [response] = ConvertReportToResponseStruct(metaData, dropboxDir)
+function [response] = convertReportToResponseStruct(metaData, dropboxDir)
 % [response] = ConvertReportToResponseStruct(metaData, dropboxDir)
 
 % This function will generate a Response Struct for a single LiveTrack
@@ -34,9 +34,9 @@ if isfield (metaData.names, 'GazeCalName')
     if strcmp (SC3TScreenSizeMeasurements.distanceToScreen, 'cm')
         viewDist = viewDist * 10;
     end
-    [PupilData] = CalibrateLiveTrackData(Report,ScaleCal,CalMat,Rpc,viewDist);
+    [PupilData] = calibrateLiveTrackData(Report,ScaleCal,CalMat,Rpc,viewDist);
 else
-    [PupilData] = CalibrateLiveTrackData(Report,ScaleCal);
+    [PupilData] = calibrateLiveTrackData(Report,ScaleCal);
 end
 %% MAKE RESPONSE STRUCTURE
-[response] = MakePupilResponseStruct(PupilData, metaData);
+[response] = makePupilResponseStruct(PupilData, metaData);

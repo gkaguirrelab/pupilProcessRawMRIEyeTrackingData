@@ -1,4 +1,4 @@
-function [ecc, pol] = ConvertLiveTrackCartToPolar(x,y,f)
+function [ecc, pol] = convertLiveTrackCartToPolar(x,y,f)
 % function [ecc, pol] = ConvertLiveTrackCartToPolar(x,y,f)
 %
 % this function converts the cartesian coordinates of the Gaze direction

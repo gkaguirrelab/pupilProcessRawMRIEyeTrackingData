@@ -29,7 +29,7 @@ dropboxDir = fullfile('/Users', userName, '/Dropbox-Aguirre-Brainard-Lab');
 % direcotry
 
 % This needs to be written
-%[ metaDataCellArray ] = IdentifyReportsToProcess(dropboxDir);
+%[ metaDataCellArray ] = identifyReportsToProcess(dropboxDir);
 
 % For now, here is some hard-coded production of a metaDataCellArray
 projectFolder = 'TOME_data'; 
@@ -45,8 +45,8 @@ runName = 'tfMRI_RETINO_PA_run01';
 ScaleCalName = 'TOME_3001_081916ScaleCal';
 GazeCalName = 'LTcal_081916_133549';
 
-%% make metadata
-[metaDataCellArray{1,1,1,1}] = MakeMetaData(outputDir,projectFolder,...
+%% make metadata cell array
+[metaDataCellArray{1,1,1,1}] = makeMetaData(outputDir,projectFolder,...
     projectSubfolder,eyeTrackingFolder,stimuliDir,screenSpecsFile,unitsFile,...
     subjectName,sessionDate,runName,ScaleCalName,GazeCalName);
 
@@ -63,7 +63,7 @@ for ss=1:nSessions
             for rr=1:nRuns
                 if ~isempty(metaDataCellArray{ss,bb,dd,rr})
                     responseStructCellArray{ss,bb,dd,rr} = ...
-                        ConvertReportToResponseStruct(metaDataCellArray{ss,bb,dd,rr}, dropboxDir);
+                        convertReportToResponseStruct(metaDataCellArray{ss,bb,dd,rr}, dropboxDir);
                 end % check that this instance exists
             end % loop over runs
         end % loop over dates

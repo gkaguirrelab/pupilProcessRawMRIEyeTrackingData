@@ -1,4 +1,4 @@
-function [PupilData] = CalibrateLiveTrackData(Report,ScaleCal,CalMat,Rpc,viewDist)
+function [PupilData] = calibrateLiveTrackData(Report,ScaleCal,CalMat,Rpc,viewDist)
 % function [PupilData] = CalibrateLiveTrackData(Report,ScaleCal,CalMat,Rpc,viewDist)
 %
 %
