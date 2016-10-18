@@ -15,23 +15,7 @@ warning on;
 userName = strtrim(tmpName);
 dropboxDir = fullfile('/Users', userName, '/Dropbox-Aguirre-Brainard-Lab');
 
-
-%% Identify available reports to process on the DropBox directory
-% Organize the list of available reports
-
-% TO BE WRITTEN -- the result of this routine will be a metaData cell array
-% (with the dimensions session / subject / date / run ) which has the
-% information needed for processing for each run.
-
-% NOTE: All paths returned in the metaData should be referenced with
-% respect to TOME_data or TOME_analysis. That is, the paths should not
-% include the user name or the particular name of the toplevel dropbox
-% direcotry
-
-% This needs to be written
-%[ metaDataCellArray ] = identifyReportsToProcess(dropboxDir);
-
-% For now, here is some hard-coded production of a metaDataCellArray
+%% For now, here is some hard-coded production of a metaDataCellArray
 projectFolder = 'TOME_data'; 
 projectSubfolder = 'session2_spatialStimuli';
 eyeTrackingFolder = 'EyeTracking';
@@ -45,11 +29,54 @@ runName = 'tfMRI_RETINO_PA_run01';
 ScaleCalName = 'TOME_3001_081916ScaleCal';
 GazeCalName = 'LTcal_081916_133549';
 
-%% make metadata cell array
 [metaDataCellArray{1,1,1,1}] = makeMetaData(outputDir,projectFolder,...
     projectSubfolder,eyeTrackingFolder,stimuliDir,screenSpecsFile,unitsFile,...
     subjectName,sessionDate,runName,ScaleCalName,GazeCalName);
 
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DEV
+%% Identify available reports to process on the DropBox directory
+% Organize the list of available reports, matched with all necessary params
+% for analysis.
+
+% project params
+dropBoxDir = 'TOME_data';
+params.outputDir = 'TOME_analysis';
+params.eyeTrackingDir = 'EyeTracking';
+params.stimuliDir = 'Stimuli';
+param.screenSpecsFile = 'TOME_materials/hardwareSpecifications/SC3TScreenSizeMeasurements.mat';
+params.unitsFile = 'TOME_materials/hardwareSpecifications/unitsFile.mat';
+
+[reportsToProcessCellArray, reportParamsStructArray] = identifyReportsToProcess(dropboxDir,params);
+
+%% make metadata cell array
+
+% will become
+nSessions=size(reportsToProcessCellArray,1);
+nSubjects=size(reportsToProcessCellArray,2);
+nDates=size(reportsToProcessCellArray,3);
+nRuns=size(reportsToProcessCellArray,4);
+
+for cc=1:nSessions
+    for ss=1:nSubjects
+        for dd=1:nDates
+            for rr=1:nRuns
+                if ~isempty(reportsToProcessCellArray{cc,ss,dd,rr})
+                    metaDataCellArray{cc,ss,dd,rr} = makeMetaData(reportsToProcessCellArray{cc,ss,dd,rr}, reportParamsStructArray{cc,ss,dd,rr});
+                end 
+            end 
+        end 
+    end 
+end 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% /DEV
 %% Convert the metaDataCellArray into a cell array of response structs
 
 nSessions=size(metaDataCellArray,1);
@@ -57,13 +84,13 @@ nSubjects=size(metaDataCellArray,2);
 nDates=size(metaDataCellArray,3);
 nRuns=size(metaDataCellArray,4);
 
-for ss=1:nSessions
-    for bb=1:nSubjects
+for cc=1:nSessions
+    for ss=1:nSubjects
         for dd=1:nDates
             for rr=1:nRuns
-                if ~isempty(metaDataCellArray{ss,bb,dd,rr})
-                    responseStructCellArray{ss,bb,dd,rr} = ...
-                        convertReportToResponseStruct(metaDataCellArray{ss,bb,dd,rr}, dropboxDir);
+                if ~isempty(metaDataCellArray{cc,ss,dd,rr})
+                    responseStructCellArray{cc,ss,dd,rr} = ...
+                        convertReportToResponseStruct(metaDataCellArray{cc,ss,dd,rr}, dropboxDir);
                 end % check that this instance exists
             end % loop over runs
         end % loop over dates
