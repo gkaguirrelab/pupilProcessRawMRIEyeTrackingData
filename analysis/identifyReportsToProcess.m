@@ -1,4 +1,4 @@
-function [reportsToProcess, reportParamsStruct] = identifyReportsToProcess(dropboxDir,params)
+function [reportsToProcess, reportParamsStructArray] = identifyReportsToProcess(dropboxDir,params)
 
 %  [reportToProcess, reportParamsStruct] = identifyReportsToProcess(dropboxDir,params)
 
@@ -71,8 +71,8 @@ for cc = 1 : length(sessions) % loop in sessions
                         
                         %%%%%%%%%%% NEED TO WRITE CODE TO LOOK FOR ScaleCal
                         %%%%%%%%%%% and for GAZECAL FILES
-                        reportParamsStructArray{cc,ss,dd,rr}.scaleCalName % code looks for it
-                        reportParamsStructArray{cc,ss,dd,rr}.GazeCalName  % code looks for it
+%                         reportParamsStructArray{cc,ss,dd,rr}.scaleCalName % code looks for it
+%                         reportParamsStructArray{cc,ss,dd,rr}.GazeCalName  % code looks for it
                    
                         %%%%%%%%%%%%%%%%%%%%%%%%%%
                     end   
