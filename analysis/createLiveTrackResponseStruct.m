@@ -1,6 +1,6 @@
 function [response] = createLiveTrackResponseStruct(metaData,dropboxDir)
 
-% This function will generate a Response Struct for a single LiveTrack 
+% This function will generate a Response Struct for a single LiveTrack
 %   dataset (i.e. a single run).
 %
 %   Usage:
@@ -18,35 +18,46 @@ if ~isfield(metaData,'viewDist')
     disp(['setting metaData.viewDist = ' num2str(metaData.viewDist)]);
 end
 %% Get the eye tracking files
-eyeDir              = fullfile(dropboxDir,metaData.dropboxPaths.projectFolder,...
-    metaData.dropboxPaths.projectSubfolder,metaData.names.subjectName,metaData.names.sessionDate,'EyeTracking');
-eyeFile             = [metaData.names.runName '_report.mat'];
+eyeDir              = fullfile(dropboxDir,metaData.projectFolder,...
+    metaData.projectSubfolder,metaData.subjectName,metaData.sessionDate,metaData.eyeTrackingDir);
+eyeFile             = metaData.runName;
 reportFile          = fullfile(eyeDir,eyeFile);
 
-%% Get the data
+%% Get the pupil raw data
 [pupil,glint]           = getLiveTrackReportData(reportFile);
-calMat                  = load(fullfile(eyeDir,metaData.names.GazeCalName));     
 
-%% Pull out the raw response data
+%% Load calibration values
+scaleCal                = load(fullfile(eyeDir,metaData.scaleCalName));
+if isfield (metaData, 'gazeCalName')
+    calMat                  = load(fullfile(eyeDir,metaData.gazeCalName));
+end
+%% Pull out the response data
 % make a temporary vector for timebase
 response.timeBase       = 1:length(pupil.x);
 % get the first TR
 allTs                   = find(pupil.TTL == 1);
 % if present, set the first TR to time zero
 if ~isempty(allTs)
-    firstT                  = allTs(1);
-    response.timeBase       = (response.timeBase - firstT) * metaData.acqRate;
+    firstT              = allTs(1);
+    response.timeBase   = (response.timeBase - firstT) * metaData.acqRate;
+else
+    response.timeBase   = (response.timeBase - 1) * metaData.acqRate;
 end
 % set the other values
-response.pupilWidth     = pupil.width;
-response.pupilHeight    = pupil.height;
 response.TTL            = pupil.TTL;
 response.isTracked      = pupil.isTracked;
 
+%% Calibrate pupil size
+response.pupilWidth     = pupil.width ./ scaleCal.ScaleCal.cameraUnitsToMmWidthMean;
+response.pupilHeight    = pupil.height./ scaleCal.ScaleCal.cameraUnitsToMmHeightMean;
 %% Calculate the gaze
-outData                 = crsLiveTrackCalibrateRawData(calMat.CalMat, calMat.Rpc, [pupil.x;pupil.y]', [glint.x;glint.y]');
-gaze.x                  = outData(:,1);
-gaze.y                  = outData(:,2);
-[gaze.pol,gaze.ecc]     = cart2pol(gaze.x,gaze.y);
-response.gazeEcc        = rad2deg(calc_visual_angle(gaze.ecc,metaData.viewDist))';
-response.gazePolar      = mod(rad2deg( ((2*pi) - gaze.pol) + pi),360)'; 
+if isfield (metaData, 'gazeCalName')
+    outData                 = crsLiveTrackCalibrateRawData(calMat.CalMat, calMat.Rpc, [pupil.x;pupil.y]', [glint.x;glint.y]');
+    gaze.x                  = outData(:,1);
+    gaze.y                  = outData(:,2);
+    [gaze.pol,gaze.ecc]     = cart2pol(gaze.x,gaze.y);
+    response.gazeEcc        = rad2deg(calc_visual_angle(gaze.ecc,metaData.viewDist))';
+    response.gazePolar      = mod(rad2deg( ((2*pi) - gaze.pol) + pi),360)';
+end
+%% Append metaData
+response.metaData = metaData;
