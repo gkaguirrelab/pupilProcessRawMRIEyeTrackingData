@@ -1,10 +1,11 @@
 function [reportToProcess, reportParams] = identifyReportsToProcess(dropboxDir,params)
+% [reportToProcess, reportParamsStruct] = identifyReportsToProcess(dropboxDir,params)
 
-%  [reportToProcess, reportParamsStruct] = identifyReportsToProcess(dropboxDir,params)
-
+% This functions loops in the dropboxDir guided by the project specific
+% params and returns a cell array of reports to process with their
+% associated reportParams.
 
 % INPUTS
-%
 % dropBoxDir
 % params.outputDir = 'TOME_analysis';
 % params.projectFolder = 'TOME_data';
@@ -15,30 +16,29 @@ function [reportToProcess, reportParams] = identifyReportsToProcess(dropboxDir,p
 % params.unitsFile = 'TOME_materials/hardwareSpecifications/unitsFile.mat';
 
 
-% HOW THE CELL ARRAY LOOKS LIKE
-% reportsToProcessCellArray{cc} = session
-% reportsToProcessCellArray{cc,ss} = subject
-% reportsToProcessCellArray{cc,ss,dd} = date
-% reportsToProcessCellArray{cc,ss,dd,rr} = run
+% HOW reportToProcess LOOKS LIKE
+% reportToProcess{cc} = session
+% reportToProcess{cc,ss} = subject
+% reportToProcess{cc,ss,dd} = date
+% reportToProcess{cc,ss,dd,rr} = run
 % % code looks for all these fields
 
 
-% HOW THE PARAMS ARRAY LOOKS LIKE
-% reportParamsStructArray{cc,ss,dd,rr}.outputDir
-% reportParamsStructArray{cc,ss,dd,rr}.eyeTrackingDir
-% reportParamsStructArray{cc,ss,dd,rr}.stimuliDir
-% reportParamsStructArray{cc,ss,dd,rr}.screenSpecsFile
-% reportParamsStructArray{cc,ss,dd,rr}.unitsFile
-% reportParamsStructArray{cc,ss,dd,rr}.scaleCalName % code looks for it
-% reportParamsStructArray{cc,ss,dd,rr}.GazeCalName  % code looks for it
+% HOW reportParams LOOKS LIKE
+% reportParams{cc,ss,dd,rr}.outputDir
+% reportParams{cc,ss,dd,rr}.eyeTrackingDir
+% reportParams{cc,ss,dd,rr}.stimuliDir
+% reportParams{cc,ss,dd,rr}.screenSpecsFile
+% reportParams{cc,ss,dd,rr}.unitsFile
+% reportParams{cc,ss,dd,rr}.scaleCalName % code looks for it
+% reportParams{cc,ss,dd,rr}.GazeCalName  % code looks for it
 
-
-
+% Oct 2016 - written and commented, Giulia Frazzetta
 
 %% FIND ALL FOLDERS SEPARATELY
 % look for Sessions in dropboxDir
 sessions = dir(fullfile(dropboxDir, params.projectFolder, params.projectSubfolder));
-for cc = 1 : length(sessions) % loop in sessions 
+for cc = 1 : length(sessions) % loop in sessions
     % look for subjects in each session
     subjects = dir(fullfile(dropboxDir, params.projectFolder, sessions(cc).name, params.subjNaming));
     if isempty(subjects)
@@ -54,18 +54,23 @@ for cc = 1 : length(sessions) % loop in sessions
                     cnt = cnt +1;
                 end
             end
-            for dd = 1:length(dates) % loop in dates 
+            for dd = 1:length(dates) % loop in dates
                 % look for scale cal in each date (there is only one Scale
                 % calibration file)
                 ScaleCal = dir(fullfile(dropboxDir, params.projectFolder, sessions(cc).name, subjects(ss).name,dates(dd).name,params.eyeTrackingDir,'*ScaleCal*.mat'));
+                
+                % look for Gaze Calibration files
+                GazeCals = dir(fullfile(dropboxDir, params.projectFolder, sessions(cc).name, subjects(ss).name,dates(dd).name,params.eyeTrackingDir,'*LTcal*.mat'));
+                
                 % look for runs in each date
                 runs = dir(fullfile(dropboxDir, params.projectFolder, sessions(cc).name, subjects(ss).name,dates(dd).name,params.eyeTrackingDir,'*report.mat'));
                 for rr = 1 :length(runs) %loop in runs
                     % add fields in reportToProcess
                     reportToProcess{cc,ss,dd,rr} = {sessions(cc).name, subjects(ss).name, dates(dd).name, runs(rr).name};
-                    % if the report is not empty, create the
-                    % reportParamStruct
+                    
+                    % if the report is not empty ...
                     if ~isempty(reportToProcess{cc,ss,dd,rr})
+                        % ...create the reportParamStruct
                         reportParams{cc,ss,dd,rr}.outputDir = params.outputDir;
                         reportParams{cc,ss,dd,rr}.projectFolder = params.projectFolder;
                         reportParams{cc,ss,dd,rr}.projectSubfolder = sessions(cc).name;
@@ -77,11 +82,26 @@ for cc = 1 : length(sessions) % loop in sessions
                         reportParams{cc,ss,dd,rr}.sessionDate = dates(dd).name;
                         reportParams{cc,ss,dd,rr}.runName = runs(rr).name;
                         reportParams{cc,ss,dd,rr}.scaleCalName = ScaleCal.name;
-                        %%% NEED TO WRITE CODE FOR GAZECAL
-%                         reportParams{cc,ss,dd,rr}.GazeCalName  % code looks for it
-                   
-                        
-                    end   
+                        % ... assign the appropriate gaze cal file (if gaze files exist)
+                        if ~isempty(GazeCals)
+                            if length(GazeCals) == 1
+                                reportParams{cc,ss,dd,rr}.GazeCalName = GazeCals.name;
+                            else
+                                % sort Gaze Calibration files by timestamp
+                                [~,idx] = sort([GazeCals.datenum]);
+                                % get the timestamp for the current run
+                                reportTime = runs(rr).datenum;
+                                % take the most recend calibration file acquired before the current run
+                                for ii = 1: length(idx)
+                                    if GazeCals(idx(ii)).datenum < reportTime
+                                        reportParams{cc,ss,dd,rr}.GazeCalName = GazeCals(idx(ii)).name;
+                                    else
+                                       continue
+                                    end
+                                end
+                            end        
+                        end
+                    end
                 end
             end
         end
