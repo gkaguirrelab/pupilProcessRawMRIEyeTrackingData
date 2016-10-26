@@ -31,7 +31,7 @@ end
 %% CALIBRATE LIVE TRACK DATA
 if isfield (metaData.names, 'GazeCalName')
     viewDist = SC3TScreenSizeMeasurements.distanceToScreen;
-    if strcmp (SC3TScreenSizeMeasurements.distanceToScreen, 'cm')
+    if strcmp (SC3TScreenSizeMeasurements.units, 'cm')
         viewDist = viewDist * 10;
     end
     [PupilData] = calibrateLiveTrackData(Report,ScaleCal,CalMat,Rpc,viewDist);

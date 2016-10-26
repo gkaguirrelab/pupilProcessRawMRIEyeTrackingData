@@ -89,35 +89,41 @@ else
     end
 end
 %% Populate isTracked field
+ct = 0;
 for ii = 1:length([Report.frameCount]);
-    jj = ii*2;
-    PupilData(jj).isTracked = Report(ii).PupilTracked_Ch01;
-    PupilData(jj+1).isTracked = Report(ii).PupilTracked_Ch02;  
+    ct = ct + 1;
+    PupilData(ct).isTracked = Report(ii).PupilTracked_Ch01;
+    ct = ct + 1;
+    PupilData(ct).isTracked = Report(ii).PupilTracked_Ch02;  
 end
 %% Apply scale calibration to pupil Height and Width and populate PupilData
+ct = 0;
 for ii = 1:length([Report.frameCount]);
-    jj = ii*2;
-    PupilData(jj).Width = Report(ii).PupilWidth_Ch01 ./ ScaleCal.cameraUnitsToMmWidthMean;
-    PupilData(jj).Height = Report(ii).PupilHeight_Ch01 ./ ScaleCal.cameraUnitsToMmHeightMean;
-    PupilData(jj+1).Width = Report(ii).PupilWidth_Ch02 ./ ScaleCal.cameraUnitsToMmWidthMean;
-    PupilData(jj+1).Height = Report(ii).PupilHeight_Ch02 ./ ScaleCal.cameraUnitsToMmHeightMean;
+    ct = ct + 1;
+    PupilData(ct).Width = Report(ii).PupilWidth_Ch01 ./ ScaleCal.cameraUnitsToMmWidthMean;
+    PupilData(ct).Height = Report(ii).PupilHeight_Ch01 ./ ScaleCal.cameraUnitsToMmHeightMean;
+    ct = ct + 1;
+    PupilData(ct).Width = Report(ii).PupilWidth_Ch02 ./ ScaleCal.cameraUnitsToMmWidthMean;
+    PupilData(ct).Height = Report(ii).PupilHeight_Ch02 ./ ScaleCal.cameraUnitsToMmHeightMean;
 end
 
 %% Calibrate Gaze (if Gaze Calibration matrix available)
 if GazeCal
+    ct = 0;
     for ii = 1:length([Report.frameCount]);
-        jj = ii*2;
+        ct = ct + 1;
         % first field
-        pupil(jj, 1) = Report(ii).PupilCameraX_Ch01;
-        pupil(jj, 2) = Report(ii).PupilCameraY_Ch01;
-        glint(jj, 1) = Report(ii).Glint1CameraX_Ch01;
-        glint(jj, 2) = Report(ii).Glint1CameraY_Ch01;
-        
+        pupil(ct, 1) = Report(ii).PupilCameraX_Ch01;
+        pupil(ct, 2) = Report(ii).PupilCameraY_Ch01;
+        glint(ct, 1) = Report(ii).Glint1CameraX_Ch01;
+        glint(ct, 2) = Report(ii).Glint1CameraY_Ch01;
+    
         % second field
-        pupil(jj+1, 1) = Report(ii).PupilCameraX_Ch02;
-        pupil(jj+1, 2) = Report(ii).PupilCameraY_Ch02;
-        glint(jj+1, 1) = Report(ii).Glint1CameraX_Ch02;
-        glint(jj+1, 2) = Report(ii).Glint1CameraY_Ch02;
+        ct = ct + 1;
+        pupil(ct, 1) = Report(ii).PupilCameraX_Ch02;
+        pupil(ct, 2) = Report(ii).PupilCameraY_Ch02;
+        glint(ct, 1) = Report(ii).Glint1CameraX_Ch02;
+        glint(ct, 2) = Report(ii).Glint1CameraY_Ch02;
     end
     % calibrate and get: GazeX, GazeY, ecc, pol.
     data = crsLiveTrackCalibrateRawData(CalMat, Rpc, pupil, glint);
@@ -125,7 +131,7 @@ if GazeCal
     for jj = 1 : 2 * length([Report.frameCount])
         PupilData(jj).GazeX = data(jj,1);
         PupilData(jj).GazeY = data(jj,2);
-        [PupilData(jj).Ecc, PupilData(jj).Pol] = ConvertLiveTrackCartToPolar(PupilData(jj).GazeX,PupilData(jj).GazeY,viewDist);
+        [PupilData(jj).Ecc, PupilData(jj).Pol] = convertLiveTrackCartToPolar(PupilData(jj).GazeX,PupilData(jj).GazeY,viewDist);
     end
 end
 
