@@ -1,8 +1,10 @@
 %% pupilPETD_main.m
 %
-% DESCRIPTION OF ROUTINE HERE
-
-%   Outputs:
+% This script will loop into a project folder on dropbox and produce a
+% cell array of Pupil Response Structs ordered by SessionType, Subject,
+% SessionDate and Run.
+% 
+% Each response struct is as follows:
 %       response.timebase
 %       response.pupilWidth
 %       response.pupilHeight
@@ -30,8 +32,7 @@ params.subjNaming = 'TOME_3*';
 params.eyeTrackingDir = 'EyeTracking';
 params.stimuliDir = 'Stimuli';
 params.screenSpecsFile = 'TOME_materials/hardwareSpecifications/SC3TScreenSizeMeasurements.mat';
-params.unitsFile = 'TOME_materials/hardwareSpecifications/unitsFile.mat'; %%% this file does not exist yet
-
+params.unitsFile = 'TOME_materials/hardwareSpecifications/unitsFile.mat';
 
 
 %% Identify available reports to process on the DropBox directory
@@ -39,9 +40,9 @@ params.unitsFile = 'TOME_materials/hardwareSpecifications/unitsFile.mat'; %%% th
 % for analysis.
 
 [reportToProcessCellArray, reportParamsStructArray] = identifyReportsToProcess(dropboxDir,params);
-%%%% TO DO: in this function identify gaze calibration files
 
-%% Make metaData cell array
+
+%% Make metaData cell array and response struct
 nSessTypes                  = size(reportToProcessCellArray,1);
 nSubjects                   = size(reportToProcessCellArray,2);
 nSessions                   = size(reportToProcessCellArray,3);

@@ -40,6 +40,8 @@ function [metaData] = makeMetaData(reportParams)
 % metaData.creator
 % metaData.gitVersion
 %
+%
+% Oct 2016 - written and commented, Giulia Frazzetta
 %% Populate fields with inputs
 metaData.outputDir = reportParams.outputDir;
 metaData.projectFolder = reportParams.projectFolder;

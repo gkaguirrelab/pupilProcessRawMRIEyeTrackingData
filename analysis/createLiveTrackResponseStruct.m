@@ -3,9 +3,29 @@ function [response] = createLiveTrackResponseStruct(metaData,dropboxDir)
 % This function will generate a Response Struct for a single LiveTrack
 %   dataset (i.e. a single run).
 %
-%   Usage:
+% Usage:
 %       [response] = createLiveTrackResponseStruct(metaData,dropboxDir)
 %
+% 
+% Each response struct is as follows:
+% response.timeBase - time in ms.t=0 is the time when the first T is
+%       received. If no TTL is received, t = 0 is the first acquired
+%       frame.
+% response.TTL - is 1 if a TTL was received in that frame.
+% response.isTracked -  is 1 if the pupil and glint were both tracked in
+%       current frame.
+% response.pupilWidth - pupil width in mm , is 0 if blink occurrs or pupil
+%       is otherwise not tracked.
+% response.pupilHeight - pupil height in mm , is 0 if blink occurrs or pupil
+%       is otherwise not tracked.
+% response.gazeEcc - Polar radius in degrees of visual angle of the  gaze
+%       direction from the center of the screen. 
+% response.gazePolar - polar position of the gaze, given as clockwise from
+%       0 degrees (with the upper vertical meridian being the 0 degree position,
+%       and the right, horizontal meridian being 90 degrees).     
+% response.metaData
+%
+% 
 %   Written by Andrew S Bock and Giulia Frazzetta Oct 2016
 
 %% set defaults
