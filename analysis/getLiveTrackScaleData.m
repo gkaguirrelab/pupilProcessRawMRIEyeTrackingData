@@ -1,12 +1,9 @@
-function [calData] = getLiveTrackScaleData(params)
+function [calData] = getLiveTrackScaleData(calFile)
 
 % Load a LiveTrack '*ScaleCal.mat.mat' data file, outputs scale data
 %
 %   Usage:
-%       [calData] = getLiveTrackScaleData(dataFile)
-%
-%   Required:
-%       params.calFile  - '/path/to/some/calFile.mat';
+%       [calData] = getLiveTrackScaleData(calFile)
 %
 %   Output:
 %       calData.mm      - vector of calibration dot sizes (mm)
@@ -19,7 +16,7 @@ function [calData] = getLiveTrackScaleData(params)
 %   Written by Andrew S Bock Oct 2016
 
 %% Load the LiveTrack data file
-liveTrackData           = load(params.calFile);
+liveTrackData           = load(calFile);
 
 %% Loop through all the dot sizes
 for i = 1:length(liveTrackData.ScaleCal.pupilDiameterMmGroundTruth)
