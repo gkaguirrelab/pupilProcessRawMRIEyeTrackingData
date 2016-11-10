@@ -80,7 +80,7 @@ for cc = 1 : length(sessions) % loop in sessions
                         reportParams{cc,ss,dd,rr}.unitsFile = params.unitsFile;
                         reportParams{cc,ss,dd,rr}.subjectName = subjects(ss).name;
                         reportParams{cc,ss,dd,rr}.sessionDate = dates(dd).name;
-                        reportParams{cc,ss,dd,rr}.runName = runs(rr).name;
+                        reportParams{cc,ss,dd,rr}.runName = runs(rr).name(1:end-11);
                         reportParams{cc,ss,dd,rr}.scaleCalName = ScaleCal.name;
                         % ... assign the appropriate gaze cal file (if gaze files exist)
                         if ~isempty(GazeCals)
@@ -101,6 +101,7 @@ for cc = 1 : length(sessions) % loop in sessions
                                 end
                             end        
                         end
+                        % ... check if there is a corresponding raw video
                     end
                 end
             end
