@@ -24,7 +24,7 @@ pixPerMM = 1/pixSize; %px/mm
 %% calculate target positions in terms of DOVA
 
 % degrees of visual angle (DOVA) per mm
-DOVA = rad2deg(calc_visual_angle(1,viewDist)); %deg
+DOVA = rad2deg(atan(1./viewDist)); %deg
 
 % mm per DOVA 
 mmPerDOVA = 2*viewDist*tand(1/2); %mm/DOVA
