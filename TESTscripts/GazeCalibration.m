@@ -52,9 +52,9 @@ title ('target location in mm from center')
 % targets 
 MYtargets(:,:) = calTargets(:,:)*mmPerDOVA;  %Location of targets in mm
 
-MYTargetsDOVA = rad2deg(calc_visual_angle(sqrt((MYtargets(:,1)).^2 + (MYtargets(:,2)).^2),viewDist))
+MYTargetsDOVA = rad2deg(atan(sqrt((MYtargets(:,1)).^2 + (MYtargets(:,2)).^2) ./ viewDist));
 
-MYTargetsDOVA2 = rad2deg(calc_visual_angle(sqrt((tgtLocsMM(:,1)).^2 + (tgtLocsMM(:,2).^2)),viewDist))
+MYTargetsDOVA2 = rad2deg(atan(sqrt((tgtLocsMM(:,1)).^2 + (tgtLocsMM(:,2).^2)) ./ viewDist));
 
 %% CRS
 % mm per degree
@@ -70,4 +70,4 @@ tgtLocsPX(:,2) = round(calTargets(:,2)*pixPerDeg+cnrTarget(2));
 targets(:,:) = calTargets(:,:)*degPerMM;
 plot(targets(:,1),targets(:,2), 'o');
 
-TargetsDOVA = rad2deg(calc_visual_angle(sqrt((targets(:,1)).^2 + (targets(:,2)).^2),viewDist))
+TargetsDOVA = rad2deg(atan(sqrt((targets(:,1)).^2 + (targets(:,2)).^2) ./ viewDist));

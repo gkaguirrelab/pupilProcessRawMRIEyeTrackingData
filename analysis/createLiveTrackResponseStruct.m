@@ -81,7 +81,7 @@ if isfield (metaData, 'gazeCalName')
     gaze.x                  = outData(:,1);
     gaze.y                  = outData(:,2);
     [gaze.pol,gaze.ecc]     = cart2pol(gaze.x,gaze.y);
-    response.gazeEcc        = rad2deg(calc_visual_angle(gaze.ecc,metaData.viewDist))';
+    response.gazeEcc        = rad2deg(atan(gaze.ecc./metaData.viewDist))';
     response.gazePolar      = mod(rad2deg( ((2*pi) - gaze.pol) + pi),360)';
 end
 %% Append metaData
