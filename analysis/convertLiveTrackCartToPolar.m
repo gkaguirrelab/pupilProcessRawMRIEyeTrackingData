@@ -18,35 +18,46 @@ function [ecc, pol] = convertLiveTrackCartToPolar(x,y,f)
 % degrees (with the upper vertical meridian being the 0 degree position,
 % and the right, horizontal meridian being 90 degrees).
 
-xa = abs(x);
-d = hypot(x,y);
-if x==0 && y==0
-    ecc = 0;
-    pol = 0;
-elseif x==0
-    ecc = 2*atand(d/(2*f));
-    if y>0
-        pol = 180;
-    else
-        pol = 0;
-    end
-elseif y==0
-    ecc = 2*atand(d/(2*f));
-    if x>0
-        pol = 90;
-    else
-        pol = 270;
-    end
+if isnan(x) || isnan(y)
+    ecc = NaN;
+    pol = NaN;
+
 else
-    if x>0 && y>0
-        deltaAng = 90;
+    xa = abs(x);
+    d = hypot(x,y);
+    
+    ecc = atand(d/(f));
+    
+    if x==0 && y==0
+        pol = 0;
+        
+    elseif x==0 && y>0
+        pol = 180;
+        
+    elseif x==0 && y<0
+        pol = 0;
+        
+    elseif y==0 && x>0
+        pol = 90;
+        
+    elseif y==0 && x<0
+        pol = 270;
+        
+    elseif x>0 && y>0
+        deltaAng = 180;
+        pol = deltaAng - asind(xa/d);
+        
     elseif x>0 && y<0
         deltaAng = 0;
+        pol = deltaAng + asind(xa/d);
+        
     elseif x<0 && y>0
         deltaAng = 180;
-    else
-        deltaAng = 270;
+        pol = deltaAng + asind(xa/d);
+        
+    elseif x<0 && y<0
+        deltaAng = 360;
+        pol = deltaAng - asind(xa/d);
+        
     end
-    ecc = 2*atand(d/(2*f));
-    pol = asind(xa/d) + deltaAng;
 end
